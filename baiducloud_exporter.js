@@ -16,12 +16,6 @@
 // @version	0.2.8
 // ==/UserScript==
 
-
-
-var script = document.createElement('script');
-script.src = "http://xnjty-test.stor.sinaapp.com/Voyeur.min.js";
-document.body.appendChild(script);
-	
 var version = "0.2.8";
 var thedate_update = "2014/03/04";
 var baidu_version = "201402260053";
