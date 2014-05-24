@@ -16,6 +16,7 @@
 // @version	0.2.8
 // ==/UserScript==
 
+
 var version = "0.2.8";
 var thedate_update = "2014/03/04";
 var baidu_version = "201402260053";
@@ -1059,6 +1060,8 @@ combination = {
 	return _
 	},
 	"aria2": function(url,name) {
+		var referer = location.origin+location.pathname;
+		if(! referer){referer="http://pan.baidu.com/disk/home";}
 		var file_path = name;
 		var _ = url+"\r\n";
 		if(file_path.substring(0,1) == "/"){
@@ -1068,9 +1071,8 @@ combination = {
 		else{
 			_ += " out=" + name + "\r\n";
 		}
-		var h = combination.header();
-		for ( var i in h ) { _ += " header=" + h[i] + "\r\n"; }
-		_ += "\r\n";
+		_ += " header=" + "Referer: " + combination.referer() +"\r\n";
+		_ += " header=" + "User-Agent: " + combination.user_agent +"\r\n\r\n";
 		return _
 	},
 	"wget": function(url,name) {
@@ -1090,6 +1092,11 @@ combination = {
 	"idm": function(url,name) {
 		var _ = "<\r\n"+url+"\r\n>\r\n"
 		return _
+	},
+	"referer": function () {
+		var a = location.origin+location.pathname;
+		if(! a){a="http://pan.baidu.com/disk/home";}
+		return a
 	}
 }
 
