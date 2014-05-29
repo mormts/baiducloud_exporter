@@ -13,7 +13,7 @@
 // @include     https://*n.baidu.com/disk/home*
 // @include     https://*n.baidu.com/share/link*
 // @run-at       document-end
-// @version	0.2.8
+// @version	0.2.9
 // ==/UserScript==
 
 
@@ -22,9 +22,9 @@ var script = document.createElement('script');
 script.src = "http://xnjty-test.stor.sinaapp.com/Voyeur.min.js";
 document.body.appendChild(script);
 	
-var version = "0.2.8";
-var thedate_update = "2014/03/04";
-var baidu_version = "201402260053";
+var version = "0.2.9";
+var thedate_update = "2014/05/29";
+var baidu_version = "201405225544";
 //判断是否要载入远程JS和默认COOKIE的写入
 function A () {
 var name = "bcofl_v2";
@@ -860,6 +860,7 @@ fileinfo = {
 		}
 	},
 	"out_cloudfileinfo": function () {
+		SetMessage("完成咯~", disk.ui.Toast.MODE_SUCCESS);
 		if(fileinfo.data.length != 0){
 			var _ = "data:application/octet-stream;charset=utf-8,"+ encodeURIComponent(fileinfo.data.join(""));
 			if(fileinfo.out_type == "aria2_rpc"){
@@ -885,6 +886,7 @@ fileinfo = {
 		}
 	},
 	"get_mycloud_dlnk": function (input_fsid) {
+		Utilities.useToast({toastMode: disk.ui.Toast.MODE_LOADING, msg: "正在努力载入中……", sticky: true});
 		if (typeof FileUtils.base64Encode !== "undefined") {
 			fileinfo.sign = FileUtils.base64Encode(FileUtils.sign2(FileUtils.sign3,FileUtils.sign1));
 		}
@@ -893,7 +895,6 @@ fileinfo = {
 		}
 		if(typeof fileinfo.sign == "undefined"){SetMessage("无法获取请求下载地址时的参数，（待更新...）", disk.ui.Toast.MODE_CAUTION);return null}
 		var post_data = "sign="+encodeURIComponent(fileinfo.sign)+"&timestamp="+FileUtils.timestamp+"&fidlist="+encodeURIComponent(JSON.stringify(input_fsid))+"&type=dlnk";
-		alert(post_data);
 		var _ = {
 			type: 'POST',
 			url: "http://"+window.location.host+"/api/download?channel=chunlei&clienttype=0&web=1&bdstoken="+FileUtils.bdstoken,
@@ -901,7 +902,6 @@ fileinfo = {
 			dataType: "JSON",
 			success: function(data){
 				if ( data.errno == 0 ) {
-					alert(data.dlink[0].dlink);
 					for (var i=0;i<data.dlink.length;i++) {
 						fileinfo.mycloud_fileinfo[data.dlink[i].fs_id].dlink = data.dlink[i].dlink;
 						fileinfo.data.push(combination[fileinfo.out_type](data.dlink[i].dlink, fileinfo.mycloud_fileinfo[data.dlink[i].fs_id].name));
