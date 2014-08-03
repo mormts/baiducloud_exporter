@@ -13,14 +13,77 @@
 // @include     https://*n.baidu.com/disk/home*
 // @include     https://*n.baidu.com/share/link*
 // @run-at       document-end
-// @version	0.2.9
+// @version	0.3.0
 // ==/UserScript==
 
-var version = "0.2.9";
-var thedate_update = "2014/05/29";
-var baidu_version = "201405225544";
+var version = "0.3.0";
+var thedate_update = "2014/08/03";
+var baidu_version = "201407314102";
 var updatejsurl = "http://downjs.sinaapp.com/";
 
+if ( typeof FileUtils == "undefined" ) {window.FileUtils="";window.SHARE=0;}else{window.SHARE=1;}
+
+if(window.SHARE==0){
+var home_cookie = "BAIDUID=" + document.cookie.match(new RegExp("(^| )"+"BAIDUID"+"=([^;]*)(;|$)"))[2] + ";";
+home_cookie += "BDUSS=" + yunData.MYBDUSS + ";";
+home_cookie += "NBID=" + document.cookie.match(new RegExp("(^| )"+"NBID"+"=([^;]*)(;|$)"))[2] + ";";
+home_cookie += "cflag=" + document.cookie.match(new RegExp("(^| )"+"cflag"+"=([^;]*)(;|$)"))[2] + ";";
+}else{
+	var home_cookie = "";
+}
+
+
+/**
+ * "mini" Selector Engine
+ * Copyright (c) 2009 James Padolsey
+ * -------------------------------------------------------
+ * Dual licensed under the MIT and GPL licenses.
+ *    - http://www.opensource.org/licenses/mit-license.php
+ *    - http://www.gnu.org/copyleft/gpl.html
+ * -------------------------------------------------------
+ * Version: 0.01 (BETA)
+ */
+var mini=(function(){var b=/(?:[\w\-\\.#]+)+(?:\[\w+?=([\'"])?(?:\\\1|.)+?\1\])?|\*|>/ig,g=/^(?:[\w\-_]+)?\.([\w\-_]+)/,f=/^(?:[\w\-_]+)?#([\w\-_]+)/,j=/^([\w\*\-_]+)/,h=[null,null];function d(o,m){m=m||document;var k=/^[\w\-_#]+$/.test(o);if(!k&&m.querySelectorAll){return c(m.querySelectorAll(o))}if(o.indexOf(",")>-1){var v=o.split(/,/g),t=[],s=0,r=v.length;for(;s<r;++s){t=t.concat(d(v[s],m))}return e(t)}var p=o.match(b),n=p.pop(),l=(n.match(f)||h)[1],u=!l&&(n.match(g)||h)[1],w=!l&&(n.match(j)||h)[1],q;if(u&&!w&&m.getElementsByClassName){q=c(m.getElementsByClassName(u))}else{q=!l&&c(m.getElementsByTagName(w||"*"));if(u){q=i(q,"className",RegExp("(^|\\s)"+u+"(\\s|$)"))}if(l){var x=m.getElementById(l);return x?[x]:[]}}return p[0]&&q[0]?a(p,q):q}function c(o){try{return Array.prototype.slice.call(o)}catch(n){var l=[],m=0,k=o.length;for(;m<k;++m){l[m]=o[m]}return l}}function a(w,p,n){var q=w.pop();if(q===">"){return a(w,p,true)}var s=[],k=-1,l=(q.match(f)||h)[1],t=!l&&(q.match(g)||h)[1],v=!l&&(q.match(j)||h)[1],u=-1,m,x,o;v=v&&v.toLowerCase();while((m=p[++u])){x=m.parentNode;do{o=!v||v==="*"||v===x.nodeName.toLowerCase();o=o&&(!l||x.id===l);o=o&&(!t||RegExp("(^|\\s)"+t+"(\\s|$)").test(x.className));if(n||o){break}}while((x=x.parentNode));if(o){s[++k]=m}}return w[0]&&s[0]?a(w,s):s}var e=(function(){var k=+new Date();var l=(function(){var m=1;return function(p){var o=p[k],n=m++;if(!o){p[k]=n;return true}return false}})();return function(m){var s=m.length,n=[],q=-1,o=0,p;for(;o<s;++o){p=m[o];if(l(p)){n[++q]=p}}k+=1;return n}})();function i(q,k,p){var m=-1,o,n=-1,l=[];while((o=q[++m])){if(p.test(o[k])){l[++n]=o}}return l}return d})();
+
+
+function isArray(o) {
+  return Object.prototype.toString.call(o) === '[object Array]';   
+}
+if ( typeof FileUtils == "undefined" ) {window.FileUtils="";}
+function getElementsByClassName(className,tagName,_this){ 
+         var ele=[],all=_this.getElementsByTagName(tagName||"*"); 
+          for(var i=0;i<all.length;i++){ 
+                    if(all[i].className==className){ 
+                         ele[ele.length]=all[i]; 
+                      }
+          }
+          return ele[0]; 
+}
+
+function getStyle(obj, css) {
+	if(obj.currentStyle) {
+		parseFloat()
+		return parseFloat(obj.currentStyle[css]);
+	}
+	else if(window.getComputedStyle) {
+		
+		return parseFloat(window.getComputedStyle(obj , null)[css]);
+	}
+}
+
+function setStyle(obj, css) {
+//     for(var attr in obj){
+//       obj.style[attr] = css[attr];
+//    }
+	if(isArray(obj)){
+		for(var i in obj){
+			obj[i].style.cssText = css;
+		}
+	}
+	else{
+		obj.style.cssText = css;
+	}
+}
 //判断是否要载入远程JS和默认COOKIE的写入
 function A () {
 var name = "bcofl_v2";
@@ -103,8 +166,8 @@ else{
 		}};
 		document.body.appendChild(script);
 		window.loadtime = window.setTimeout(function(){
-					Utilities.useToast({
-						toastMode: disk.ui.Toast.MODE_CAUTION,
+					SetMessage({
+						type: CAUTION,
 						msg: "\u52a0\u8f7d\u8fdc\u7aef\u7684\u004a\u0053\u002e\u002e\u002e\u5931\u8d25\u3002\u73b0\u5728\u4f7f\u7528\u672c\u5730\u7684\u811a\u672c\u3002",
 						sticky: false
 					});
@@ -114,8 +177,8 @@ else{
 			},3500); 
 		}
 		else{
-			Utilities.useToast({
-				toastMode: disk.ui.Toast.MODE_LOADING,
+			SetMessage({
+				type: LOADING,
 				msg: "\u597d\u50cf\u8fdc\u7aef\u811a\u672c\u4e5f\u9519\u8bef\u4e86\uff0c\u7b49\u66f4\u65b0\u5427\u3002",
 				sticky: false
 			});
@@ -138,27 +201,21 @@ function localjs (){
 				if(script_src > baidu_version){
 				//	alert("\u68c0\u6d4b\u5230\u7f51\u7ad9\u6709\u66f4\u65b0\uff0c\u4f7f\u7528\u8fc7\u7a0b\u4e2d\u51fa\u73b0\u95ee\u9898\u8bf7\u66f4\u65b0\u005c\u0072\u005c\u006e\u6216\u8005\u4f7f\u7528\u8fdc\u7a0b\u004a\u0053\u811a\u672c\u5728\u6216\u8005\u7b49\u5f85\u4f5c\u8005\u66f4\u65b0\u5427\u3002");
 					var msg = "\u68c0\u6d4b\u5230\u7f51\u7ad9\u6709\u66f4\u65b0\uff0c\u5982\u4e0d\u80fd\u6b63\u5e38\u4f7f\u7528\u63d2\u4ef6\uff0c\u7b49\u66f4\u65b0\u5427\u3002";
-					Utilities.useToast({toastMode: disk.ui.Toast.MODE_CAUTION, msg: msg, sticky: false});
+					SetMessage({type: CAUTION, msg: msg, sticky: false});
 				}else{
-					var msg = "\u811a\u672c\u8f7d\u5165\u6ca1\u95ee\u9898"
-					Utilities.useToast({toastMode: disk.ui.Toast.MODE_SUCCESS, msg: msg, sticky: false});
+					var msg = "\u811a\u672c\u51c6\u5907\u5b8c\u6210\uff01\uff01\uff01"
+					SetMessage({type: SUCCESS, msg: msg, sticky: false});
 				}
 			}
 		}
 	}
 //下面正式开始
-//disk.ui.Toast.MODE_FAILURE	#错误
-//disk.ui.Toast.MODE_CAUTION	#警告
-//disk.ui.Toast.MODE_LOADING	#载入
-//disk.ui.Toast.MODE_SUCCESS	#正常
-SetMessage = function (msg,type) {
-	Utilities.useToast({
-		toastMode: type,
-		msg: msg,
-		sticky: false
-	});
-}
 
+//提示框
+//FAILURE	#错误
+//CAUTION	#警告
+//LOADING	#载入
+//SUCCESS	#正常
 event = function() {
 	//setting div
 	$("#setting_div_more_settings_but").click(function(){
@@ -401,39 +458,69 @@ center = function (obj) {
 
 button = function () {
 	var ul = [];//创建下拉列表
-	ul.push('<ul id="outlist_ul" style="display:none; position:absolute; text-align: center; border:#CFCFCF 1px solid; box-shadow: 0 2px 3px #CFCFCF; -webkit-box-shadow: 0 2px 3px #CFCFCF; line-height: 24px; text-decoration: none; z-index:100; background-color: #FFF">');
+	//ul.push('<ul id="outlist_ul" style="display:none; position:absolute; text-align: center; border:#CFCFCF 1px solid; box-shadow: 0 2px 3px #CFCFCF; -webkit-box-shadow: 0 2px 3px #CFCFCF; line-height: 24px; text-decoration: none; z-index:100; background-color: #FFF">');
+	ul.push('<ul id="outlist_ul">');
 	ul.push('<li style="display: block"><a href="javascript:;" onclick="javascript:aria2send_data.getGlobalOption();" id="out_rpc">ARIA2 RPC</a></li>');
 	ul.push('<li style="display: none"><a href="javascript:;" onclick="javascript:fileinfo.out_type=\'aria2\';fileinfo.getinfo();" id="out_aria2">ARIA2</a></li>');
 	ul.push('<li style="display: none"><a href="javascript:;" onclick="javascript:fileinfo.out_type=\'wget\';fileinfo.getinfo();" id="out_wget">WGET</a></li>');
 	ul.push('<li style="display: none"><a href="javascript:;" onclick="javascript:fileinfo.out_type=\'idm\';fileinfo.getinfo();" id="out_idm">IDM</a></li>');
 	ul.push('<li style="display: block"><a href="javascript:;"  id="setting">\u8bbe\u7f6e</a></li>');
 	ul.push('</ul>');
-	
 	if (FileUtils.share_uk){
 		//创建分享链接的导出按钮
 		var A = document.createElement("a");
 		A.className = "new-dbtn";
 		A.id = "outlist";
 		A.setAttribute("hideFocus","true");
-		A.style.cssText = "width:50px;";
-		A.innerHTML = '<em class="icon-download"></em><b>\u5bfc\u51fa</b>' + ul.join("");
-		$('span a[class="new-dbtn"]').parent().prepend(A);
+		//A.style.cssText = "width:50px;";
+		//A.style.cssText= 'width: 98%; left: 0px;'
+		A.innerHTML = '<em class="icon-download"></em><b>导出下载</b>'+ul.join("");
+		var folder = mini('div[class="link-title clearfix btn-list"] span');
+		var file = mini('header[class="slide-show-header clearfix b-bdr-slv"]');
+		//disk.util.ViewShareUtils._media_type
+		if(file.length != 0){
+			if(disk.util.ViewShareUtils._media_type){
+				if(disk.util.ViewShareUtils._media_type != "0"){var bardom = mini('header[class="slide-show-header clearfix b-bdr-slv"] span')[1];}
+			}
+			else{var bardom = file[0];}
+		}
+		if(folder.length != 0){var bardom = folder[0];}
+		bardom.insertBefore(A, bardom.childNodes[0]);
+		//$('span a[class="new-dbtn"]').parent().prepend(A);
 	}else{
 		//创建导出按钮
-		var li = document.createElement("li");
-		li.className = "b-list-item";
-		li.id = "outlist"
-		li.innerHTML = '<a class="bbtn" id="aaa" style="width:47px;"><em class="icon-download"></em><b>\u5bfc\u51fa</b></a>';
-		$('ul[class="b-list-2 bar-cmd-list"]').append(li);
-		$("#aaa").append(ul.join(""));
-	}
+		/*var A = document.createElement("a");
+		A.herf = "javascript:;";
+		A.className = "icon-btn-download";
+		A.id = "outlist"
+		A.innerHTML = '离线下载';
+		$("div[class='bar global-clearfix']").append(A);
+		$("#outlist").append(ul.join(""));*/
+		var A = document.createElement("a");
+		A.setAttribute("href","javascript:;");
+		A.setAttribute("node-type","btn-offline-downloadbtn-offline-download");
+		A.className = "icon-btn-download";
+		A.id = "outlist"
+		A.innerHTML = '导出下载'+ul.join("");
+		mini('.module-toolbar div[node-type=bar]')[0].appendChild(A)
+	
 
 	//修改下拉列表样式
-	var W = ($('#outlist').innerWidth() - 2) +'px'; //2=左右两边边框
+	/*var W = ($('#outlist').innerWidth() - 2) +'px'; //2=左右两边边框
 	if (! FileUtils.share_uk){W = ($('#outlist').width() - 2) +'px';}
+	
 	$('#outlist_ul').css({'left':'0px', 'width':W, 'margin-top':'-1px'});
-	$('#outlist_ul a').css({'color':'#666', 'display':'inline-block', 'width':'100%', 'height':'100%'});
-
+	$('#outlist_ul a').css({'color':'#666', 'display':'inline-block', 'width':'100%', 'height':'100%'});*/
+		var margin_left = 'margin-left:-';margin_left += mini("#outlist")[0].offsetWidth - getStyle(mini('#outlist')[0],'width')+'px;';
+	}
+	setStyle(mini("#outlist_ul"), 'left:0px; margin-top:-1px;display:none; text-align: center; border:#CFCFCF 1px solid; box-shadow: 0 2px 3px #CFCFCF; -webkit-box-shadow: 0 2px 3px #CFCFCF; line-height: 24px; text-decoration: none; z-index:100; background-color: #FFF;'+margin_left)
+	setStyle(mini('#outlist_ul a'), 'color:#666; display:inline-block; width:100%; height:100%;');
+	if (window.SHARE == 1){
+		var ul_ = mini("#outlist_ul")[0];
+		ul_.style.left = '0px';
+		ul_.style.width = '98%';
+		ul_.style.position = 'absolute';
+	}
 	//绑定点击事件
 	//下拉列表事件//
 	$("#outlist_ul li").hover(function(){
@@ -515,6 +602,11 @@ config = {
 
 aria2send_data = {
 	"getGlobalOption": function(){
+		SetMessage({
+					type: LOADING,
+					msg: "请稍后...",
+					sticky: true
+					});
 		var parameter = {
 			"jsonrpc": "2.0",
 			///"method": "aria2.getOption",
@@ -533,9 +625,11 @@ aria2send_data = {
 				},
 			contentType: "application/x-www-form-urlencoded; charset=UTF-8",
 			error: function(httpstate){
-				fileinfo.out_type = "aria2_rpc";
-				fileinfo.getinfo();
-				SetMessage("\u5148\u786e\u4fdd\u4e0e\u0041\u0072\u0069\u0061\u0032\u0052\u0050\u0043\u80fd\u591f\u6b63\u5e38\u901a\u4fe1\u540e\u5728\u4f7f\u7528\u5594\u3002", disk.ui.Toast.MODE_CAUTION);
+				SetMessage({
+					type: CAUTION,
+					msg: "\u5148\u786e\u4fdd\u4e0e\u0041\u0072\u0069\u0061\u0032\u0052\u0050\u0043\u80fd\u591f\u6b63\u5e38\u901a\u4fe1\u540e\u5728\u4f7f\u7528\u5594\u3002",
+					sticky: false
+					});
 				}
 		};
 		if(config.params[0].checked.rpc_distinguish){
@@ -633,20 +727,32 @@ fileinfo = {
 					if(fileinfo.out_type == "wget"){
 						down_dialog(fileinfo.out_type, _, fileinfo.data.join(""));
 						$("#masking").css("display","block");
-						SetMessage("\u5b8c\u6210\u54af\u007e\u007e\u007e", disk.ui.Toast.MODE_SUCCESS);
+						SetMessage({
+							type: SUCCESS,
+							sticky: false,
+							msg: "\u5b8c\u6210\u54af\u007e\u007e\u007e"
+						});
 						fileinfo.ajax_state = 0;
 					}
 					else if(fileinfo.out_type == "aria2_rpc"){
 						for(var i=0;i<fileinfo.data.length;i++){
 							aria2send_data.addUri(fileinfo.data[i]);
 						}
-						SetMessage("\u5df2\u7ecf\u6dfb\u52a0\u4e86\u5594\uff0c\u53bb\u786e\u8ba4\u770b\u4e0b\u5427\u3002", disk.ui.Toast.MODE_SUCCESS);
+						SetMessage({
+							type: SUCCESS,
+							sticky: false,
+							msg: "\u5df2\u7ecf\u6dfb\u52a0\u4e86\u5594\uff0c\u53bb\u786e\u8ba4\u770b\u4e0b\u5427\u3002"
+						});
 						fileinfo.ajax_state = 0;             //吧状态值恢复成0
 					}
 					else{
 						down_dialog(fileinfo.out_type, _, "");
 						$("#masking").css("display","block");
-						SetMessage("\u5b8c\u6210\u54af\u007e\u007e\u007e", disk.ui.Toast.MODE_SUCCESS);
+						SetMessage({
+							type: SUCCESS,
+							sticky: false,
+							msg: "\u5b8c\u6210\u54af\u007e\u007e\u007e"
+							});
 						fileinfo.ajax_state = 0;
 					}
 				}
@@ -676,20 +782,32 @@ fileinfo = {
 						if(fileinfo.out_type == "wget"){
 							down_dialog(fileinfo.out_type, _, fileinfo.data.join(""));
 							$("#masking").css("display","block");
-							SetMessage("\u5b8c\u6210\u54af\u007e\u007e\u007e", disk.ui.Toast.MODE_SUCCESS);
+							SetMessage({
+								type: SUCCESS,
+								sticky: false,
+								msg:"\u5b8c\u6210\u54af\u007e\u007e\u007e"
+							});
 							fileinfo.ajax_state = 0;             //吧状态值恢复成0
 						}
 						else if(fileinfo.out_type == "aria2_rpc"){
 							for(var i=0;i<fileinfo.data.length;i++){
 								aria2send_data.addUri(fileinfo.data[i]);
 							}
-							SetMessage("\u5df2\u7ecf\u6dfb\u52a0\u4e86\u5594\uff0c\u53bb\u786e\u8ba4\u770b\u4e0b\u5427\u3002", disk.ui.Toast.MODE_SUCCESS);
+							SetMessage({
+								type: SUCCESS,
+								sticky: false,
+								msg: "\u5df2\u7ecf\u6dfb\u52a0\u4e86\u5594\uff0c\u53bb\u786e\u8ba4\u770b\u4e0b\u5427\u3002"
+							});
 							fileinfo.ajax_state = 0;
 						}
 						else{
 							down_dialog(fileinfo.out_type, _, "");
 							$("#masking").css("display","block");
-							SetMessage("\u5b8c\u6210\u54af\u007e\u007e\u007e", disk.ui.Toast.MODE_SUCCESS);
+							SetMessage({
+								type: SUCCESS,
+								sticky: false,
+								msg: "\u5b8c\u6210\u54af\u007e\u007e\u007e"
+							});
 							fileinfo.ajax_state = 0;
 						}
 					}
@@ -702,15 +820,19 @@ fileinfo = {
 				alert_dialog.event();
 				}
 		else{
-			SetMessage("\u5728\u83b7\u53d6\u6587\u4ef6\u5730\u5740\u7684\u65f6\u5019\u5931\u8d25\u4e86\u3002\u3002\u3002\u3002", disk.ui.Toast.MODE_CAUTION);
+			SetMessage({
+				type:CAUTION,
+				sticky:false,
+				msg:"\u5728\u83b7\u53d6\u6587\u4ef6\u5730\u5740\u7684\u65f6\u5019\u5931\u8d25\u4e86\u3002\u3002\u3002\u3002"
+			});
 			fileinfo.ajax_state = 0;
 			}
 	},
 	"getdinlk": function (data) {
 		var uk = FileUtils.share_uk;
 		var id = FileUtils.share_id;
-		Utilities.useToast({
-			toastMode: disk.ui.Toast.MODE_LOADING,
+		SetMessage({
+			toastMode: LOADING,
 			msg: "\u52aa\u529b\u52a0\u8f7d\u4e2d\u002e\u002e\u002e\u002e",
 			sticky: true
 			});
@@ -726,7 +848,11 @@ fileinfo = {
 				fileinfo.ajaxsuccess(data);
 				},
 			error: function(httpstate){
-				SetMessage("\u5728\u83b7\u53d6\u6587\u4ef6\u4fe1\u606f\u7684\u65f6\u5019\u5931\u8d25\u4e86\u3002\u3002", disk.ui.Toast.MODE_CAUTION);
+				SetMessage({
+					type:CAUTION,
+					sticky:false,
+					msg:"\u5728\u83b7\u53d6\u6587\u4ef6\u4fe1\u606f\u7684\u65f6\u5019\u5931\u8d25\u4e86\u3002\u3002"
+				});
 				fileinfo.ajax_state = 0;
 				}
 		};
@@ -755,11 +881,19 @@ fileinfo = {
 					fileinfo.getdinlk(fileinfo.temp);
 				}
 				else if ( data.errno != 0 ) {
-					SetMessage("获取下载地址失败，（" + data.errno + "）", disk.ui.Toast.MODE_CAUTION);
+					SetMessage({
+						type:CAUTION,
+						sticky:false,
+						msg:"获取下载地址失败，（" + data.errno + "）"
+					});
 				}
 				},
 			error: function(httpstate){
-				SetMessage("\u5728\u83b7\u53d6\u6587\u4ef6\u4fe1\u606f\u7684\u65f6\u5019\u5931\u8d25\u4e86\u3002\u3002", disk.ui.Toast.MODE_CAUTION);
+				SetMessage({
+					type:CAUTION,
+					sticky:false,
+					msg:"\u5728\u83b7\u53d6\u6587\u4ef6\u4fe1\u606f\u7684\u65f6\u5019\u5931\u8d25\u4e86\u3002\u3002"
+				});
 				fileinfo.ajax_state = 0;
 				}
 		};
@@ -768,7 +902,9 @@ fileinfo = {
 	"getinfo": function(){
 		if(fileinfo.ajax_state != 0){return null}       //判断状态值避免多次点击
 		fileinfo.ajax_state = 1;                       //吧状态值设置成1避免多次点击
-		if(FileUtils.share_uk){							//判断是否分享链接
+		//typeof FileUtils == "undefined"
+		if(window.SHARE == 1){
+		//if(FileUtils.share_uk){							//判断是否分享链接
 			fileinfo.data.splice(0,fileinfo.data.length);       //使用前先清空
 			fileinfo.filelist.splice(0,fileinfo.filelist.length);
 			fileinfo.dir_fsid.splice(0,fileinfo.dir_fsid.length);
@@ -785,7 +921,11 @@ fileinfo = {
 				fileinfo.info = FileUtils.getListViewCheckedItems();
 				fileinfo.share_path = FileUtils._mFileFilter._mTag;
 				if(fileinfo.info.length == 0){
-					SetMessage("\u8bf7\u5148\u9009\u62e9\u0031\u4e2a\u4ee5\u4e0a\u7684\u6587\u4ef6",disk.ui.Toast.MODE_CAUTION);
+					SetMessage({
+						type:CAUTION,
+						sticky:false,
+						msg:"\u8bf7\u5148\u9009\u62e9\u0031\u4e2a\u4ee5\u4e0a\u7684\u6587\u4ef6"
+					});
 					fileinfo.ajax_state = 0;
 					return null
 				}
@@ -831,15 +971,38 @@ fileinfo = {
 			fileinfo.filelist.splice(0,fileinfo.filelist.length);
 			fileinfo.dir_fsid.splice(0,fileinfo.dir_fsid.length);
 			fileinfo.file_fsid.splice(0,fileinfo.file_fsid.length);
-			fileinfo.info = FileUtils.getListViewCheckedItems();
+			if ( typeof system == "undefined" ){
+				window.system = require("common:widget/data-center/data-center.js");
+			}
+			if ( typeof hash == "undefined" ) {
+				window.hash = require('common:widget/hash/hash.js');
+			}
+			//fileinfo.info = FileUtils.getListViewCheckedItems();
+			var item = system.get('selectedItemList');
+			var fileList = [];
+			var path = hash.get('path');
+			item.forEach(function(e){
+				e=e[0];
+				fileList.push({
+                fs_id: e.getAttribute('data-id'),
+                isdir: e.getAttribute('data-extname'),
+                server_filename: getElementsByClassName('name','div',e).getAttribute('title'),
+                path: path
+				})
+			});
+			fileinfo.info = fileList;
 			if(fileinfo.info.length == 0){
-				SetMessage("\u8bf7\u5148\u9009\u62e9\u0031\u4e2a\u4ee5\u4e0a\u7684\u6587\u4ef6",disk.ui.Toast.MODE_CAUTION);
+				SetMessage({
+					type:CAUTION,
+					sticky:false,
+					msg:"\u8bf7\u5148\u9009\u62e9\u0031\u4e2a\u4ee5\u4e0a\u7684\u6587\u4ef6"
+				});
 				fileinfo.ajax_state = 0;             //吧状态值恢复成0
 				return null
 			}
 			var mycloud_fsid = [];
 			for(var i=0;i<fileinfo.info.length;i++){
-				if (fileinfo.info[i].isdir == 0){
+				if (fileinfo.info[i].isdir != 'dir'){
 					fileinfo.savename = fileinfo.info[i]["server_filename"]
 					if (config.params[0].checked.web_path_save){ //判断是否根据网盘路径保存文件
 						fileinfo.savename = fileinfo.info[i]["path"];
@@ -852,18 +1015,37 @@ fileinfo = {
 					fileinfo.mycloud_fileinfo[fileinfo.info[i]["fs_id"]] = JSON.parse(fileinfo.temp);
 				}
 			}
-			fileinfo.get_mycloud_dlnk(mycloud_fsid);
+			if(mycloud_fsid.length != 0){
+				fileinfo.get_mycloud_dlnk(mycloud_fsid);
+				fileinfo.ajax_state = 0;
+			}
+			else{
+				SetMessage({
+					type:CAUTION,
+					sticky:false,
+					msg:"不要单独选择文件夹，个人网盘暂时没有支持文件夹"
+				});
+				fileinfo.ajax_state = 0;
+			}
 		}
 	},
 	"out_cloudfileinfo": function () {
-		SetMessage("完成咯~", disk.ui.Toast.MODE_SUCCESS);
+		SetMessage({
+			type:SUCCESS,
+			sticky: false,
+			msg:"完成咯~"
+		});
 		if(fileinfo.data.length != 0){
 			var _ = "data:application/octet-stream;charset=utf-8,"+ encodeURIComponent(fileinfo.data.join(""));
 			if(fileinfo.out_type == "aria2_rpc"){
 				for(var i=0;i<fileinfo.data.length;i++){
 					aria2send_data.addUri(fileinfo.data[i]);
 				}
-				SetMessage("\u5df2\u7ecf\u6dfb\u52a0\u4e86\u5594\uff0c\u53bb\u786e\u8ba4\u770b\u4e0b\u5427\u3002", disk.ui.Toast.MODE_SUCCESS);
+				SetMessage({
+					type:SUCCESS,
+					sticky:false,
+					msg:"\u5df2\u7ecf\u6dfb\u52a0\u4e86\u5594\uff0c\u53bb\u786e\u8ba4\u770b\u4e0b\u5427\u3002"
+				});
 				fileinfo.ajax_state = 0;
 			}
 			else if(fileinfo.out_type == "wget"){
@@ -882,14 +1064,18 @@ fileinfo = {
 		}
 	},
 	"get_mycloud_dlnk": function (input_fsid) {
-		Utilities.useToast({toastMode: disk.ui.Toast.MODE_LOADING, msg: "正在努力载入中……", sticky: true});
+		SetMessage({toastMode: LOADING, msg: "正在努力载入中……", sticky: true});
+		if(! FileUtils.sign2){
+			FileUtils = yunData;
+			FileUtils.sign2 = function (j,r){var a=[];var p=[];var o="";var v=j.length;for(var q=0;q<256;q++){a[q]=j.substr((q%v),1).charCodeAt(0);p[q]=q}for(var u=q=0;q<256;q++){u=(u+p[q]+a[q])%256;var t=p[q];p[q]=p[u];p[u]=t}for(var i=u=q=0;q<r.length;q++){i=(i+1)%256;u=(u+p[i])%256;var t=p[i];p[i]=p[u];p[u]=t;k=p[((p[i]+p[u])%256)];o+=String.fromCharCode(r.charCodeAt(q)^k)}return o};
+		}
 		if (typeof FileUtils.base64Encode !== "undefined") {
 			fileinfo.sign = FileUtils.base64Encode(FileUtils.sign2(FileUtils.sign3,FileUtils.sign1));
 		}
 		else{
-			fileinfo.sign = file.info.BaiduBase64encode(FileUtils.sign2(FileUtils.sign3,FileUtils.sign1));
+			fileinfo.sign = fileinfo.BaiduBase64encode(FileUtils.sign2(FileUtils.sign3,FileUtils.sign1));
 		}
-		if(typeof fileinfo.sign == "undefined"){SetMessage("无法获取请求下载地址时的参数，（待更新...）", disk.ui.Toast.MODE_CAUTION);return null}
+		if(typeof fileinfo.sign == "undefined"){SetMessage({type:CAUTION,sticky:false,msg:"无法获取请求下载地址时的参数，（待更新...）"});return null}
 		var post_data = "sign="+encodeURIComponent(fileinfo.sign)+"&timestamp="+FileUtils.timestamp+"&fidlist="+encodeURIComponent(JSON.stringify(input_fsid))+"&type=dlnk";
 		var _ = {
 			type: 'POST',
@@ -904,17 +1090,21 @@ fileinfo = {
 					}
 					fileinfo.out_cloudfileinfo();
 				}
-				if ( data.error == 112 ) { SetMessage("当前页面已超时，请刷新页面后重试。（" + data.errno + "）", disk.ui.Toast.MODE_CAUTION); }
-				if ( data.errno != 0 && data.errno != 112 ) { SetMessage("获取下载地址失败。（" + data.errno + "）", disk.ui.Toast.MODE_CAUTION); }
+				if ( data.error == 112 ) { SetMessage({type:CAUTION,sticky:false,msg:"当前页面已超时，请刷新页面后重试。（" + data.errno + "）"}); }
+				if ( data.errno != 0 && data.errno != 112 ) { SetMessage({type:CAUTION,sticky:false,msg:"获取下载地址失败。（" + data.errno + "）"}); }
 			},
 			error: function(){
-				SetMessage("\u5728\u83b7\u53d6\u6587\u4ef6\u4fe1\u606f\u7684\u65f6\u5019\u5931\u8d25\u4e86\u3002\u3002", disk.ui.Toast.MODE_CAUTION);
+				SetMessage({
+					type:CAUTION,
+					sticky:false,
+					msg:"\u5728\u83b7\u53d6\u6587\u4ef6\u4fe1\u606f\u7684\u65f6\u5019\u5931\u8d25\u4e86\u3002\u3002"
+				});
 				fileinfo.ajax_state = 0;
 			}
 		};
 		HttpSendRead(_);
 	},
-	"BaiduBase64encode": function(input) {
+	"BaiduBase64encode": /*function(input) {
     	var key = "", out, i, _, chs1, chs2, chs3;
 		_ = input.length;
     	i = 0;
@@ -942,7 +1132,8 @@ fileinfo = {
         	out += key.charAt(chs3 & 63);
     	}
     	return out;
-	}
+	}*/
+	function (e){var t,n,i,o,r,a,s="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";for(i=e.length,n=0,t="";i>n;){if(o=255&e.charCodeAt(n++),n==i){t+=s.charAt(o>>2),t+=s.charAt((3&o)<<4),t+="==";break}if(r=e.charCodeAt(n++),n==i){t+=s.charAt(o>>2),t+=s.charAt((3&o)<<4|(240&r)>>4),t+=s.charAt((15&r)<<2),t+="=";break}a=e.charCodeAt(n++),t+=s.charAt(o>>2),t+=s.charAt((3&o)<<4|(240&r)>>4),t+=s.charAt((15&r)<<2|(192&a)>>6),t+=s.charAt(63&a)}return t}
 	
 }
 
@@ -1023,20 +1214,28 @@ alert_dialog = {
 			fileinfo.getdinlk(_);
 			//$("#alert_div").css({"display": "none"});
 			$("#alert_div").remove();
-			//SetMessage("请稍后...", disk.ui.Toast.MODE_LOADING)
+			//SetMessage("请稍后...", LOADING)
 			$("#masking").css("display","none");
 		})
 		$("#ignore").unbind().click(function(){
 			//$("#alert_div").css({"display": "none"});
 			$("#alert_div").remove();
 			$("#masking").css("display","none");
-			SetMessage("\u5509\u002e\u002e\u002e\u002e\u002e", disk.ui.Toast.MODE_CAUTION);
+			SetMessage({
+				type:CAUTION,
+				sticky:false,
+				msg:"\u5509\u002e\u002e\u002e\u002e\u002e"
+			});
 			fileinfo.ajax_state = 0;
 		})
 		$("#alert_dialog_close").unbind().click(function(){
 			$("#alert_div").remove();
 			$("#masking").css("display","none");
-			SetMessage("\u5509\u002e\u002e\u002e\u002e\u002e", disk.ui.Toast.MODE_CAUTION);
+			SetMessage({
+				type:CAUTION,
+				sticky:false,
+				msg:"\u5509\u002e\u002e\u002e\u002e\u002e"
+			});
 			fileinfo.ajax_state = 0;
 		})
 	}
@@ -1109,6 +1308,7 @@ combination = {
 				addheader.push(text[i]);
 			}
 		}
+		addheader.push("Cookie: " + home_cookie);
 		return addheader;
 	},
 	"aria2_rpc": function(url, name) {
@@ -1221,12 +1421,72 @@ masking();
 localjs();
 }
 }
-	catch (type) {
-		window.setTimeout(function(){
-			Utilities.useToast({toastMode: disk.ui.Toast.MODE_CAUTION,msg: "\u6267\u884c\u811a\u672c\u65f6\u53d1\u751f\u9519\u8bef\uff0c\u5c1d\u8bd5\u4f7f\u7528\u8fdc\u7a0b\u811a\u672c\u3002",sticky: true});
-			window.setTimeout(loadjs,2000);
-			},2000);
+	catch (errortype) {
+		SetMessage({type: CAUTION, msg: "脚本错误："+errortype, sticky: true});
 	}
 }
 }
+function createMsgDiv() {
+	var msgdiv = document.createElement("div");
+	var off = document.createElement("a");
+	var textmsg = document.createElement("div");
+	var typeimg = document.createElement("em");
+	msgdiv.id = "msgdiv";
+	typeimg.style.cssText = "background: url('/res/static/images/btn_icon.gif') no-repeat; height: 20px; width: 20px; background-position: -42px -229px; position: absolute; top: 12px; left: 2px;";
+	msgdiv.style.cssText = "width:290px; color: #FF6830; border: 1px solid rgb(219, 175, 62); background: #FFE59E; border: #DBAF3E 1px solid; position: absolute; /* padding-left: 10px; padding-right: 10px; */ text-align: left; /*text-shadow: 1px 1px 3px #888;*/ -webkit-box-shadow: 0px 0px 10px 0px #dbae3e; box-shadow: 0px 0px 10px 0px #dbae3e; display:none; z-index: 999;";
+	off.style.cssText = "position: absolute; font-weight: bold; margin-left: 270px; top: -5px; font-size: 20px; text-decoration:none;";
+	textmsg.style.cssText = "word-wrap: break-word; word-break: normal; width: 245px; padding-top: 10px; padding-bottom: 10px; padding-left: 25px; padding-right: 25px;";
+	off.setAttribute("onclick", "javascript:mini('#msgdiv')[0].style.display='none';");
+	off.setAttribute("href", 'javascript:void(0);');
+	off.innerHTML = "×";
+	document.body.appendChild(msgdiv);
+	msgdiv.appendChild(off); 
+	msgdiv.appendChild(textmsg); 
+	msgdiv.appendChild(typeimg);
+//FAILURE	#错误
+//CAUTION	#警告
+//LOADING	#载入
+//SUCCESS	#正常
+	window.CAUTION= "url(http://pan.baidu.com/res/static/images/btn_icon.gif) -42px -269px no-repeat",
+	window.FAILURE= "url(http://pan.baidu.com/res/static/images/btn_icon.gif) -42px -249px no-repeat",
+	window.SUCCESS= "url(http://pan.baidu.com/res/static/images/btn_icon.gif) -42px -229px no-repeat",
+	window.LOADING= "url(http://s2.pan.bdstatic.com/res/static/images/loading.gif) no-repeat"
+    function divSite (){
+	    var screenWidth = document.body.clientWidth, screenHeight = document.body.clientHeight, scrolltop = document.body.scrollTop;
+		var objLeft = (screenWidth - getStyle(mini('#msgdiv')[0],'width'))/2;
+		
+		if (window.SHARE == 0){var objTop = mini('.module-list-view')[0].offsetTop+5;}
+		else{
+			var folder = mini('div[class="link-title clearfix btn-list"]');
+			var file = mini('header[class="slide-show-header clearfix b-bdr-slv"]');
+			if(file.length != 0){var objTop = file[0].getBoundingClientRect().bottom+5;}
+			if(folder.length != 0){var objTop = folder[0].getBoundingClientRect().bottom+5;}
+		}
+		mini('#msgdiv')[0].style.left = objLeft + 'px';
+		mini('#msgdiv')[0].style.top = objTop + 'px';
+    }
+    divSite();
+    //浏览器窗口大小改变时
+    window.addEventListener("resize", divSite);
+}
+SetMessage = function  (obj) {
+	mini("#msgdiv div")[0].innerHTML = obj.msg;
+	mini("#msgdiv em")[0].style.background = obj.type;
+	mini('#msgdiv')[0].style.display='block';
+	function closMsg () {
+		mini('#msgdiv')[0].style.display='none';
+		window.MsgTime = 0;
+	}
+	if(obj.sticky == false){
+		if( typeof window.MsgTime == "undefined" || window.MsgTime == 0){
+			window.MsgTime = window.setTimeout(closMsg, 5000);
+		}
+		else{
+			clearTimeout(window.MsgTime);
+			window.MsgTime = 0;
+			SetMessage(obj);
+		}
+	}
+}
+createMsgDiv();
 A();
