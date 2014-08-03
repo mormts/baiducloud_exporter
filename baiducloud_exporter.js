@@ -3,9 +3,9 @@
 // @author	        Mormts
 // @description	一个方便吧百度网盘的文件导出的脚本。(Aria2rpc, Aria2, Wget, IDM)。
 // @encoding	       utf-8
-// @homepageURL    https://userscripts.org/scripts/show/178301
-// @updateURL         https://userscripts.org/scripts/source/178301.meta.js
-// @downloadURL     https://userscripts.org/scripts/source/178301.user.js
+// @homepageURL    https://github.com/mormts/baiducloud_exporter
+// @updateURL       http://downjs.sinaapp.com/javascript/baiducloud_exporter.js
+// @downloadURL     http://downjs.sinaapp.com/javascript/baiducloud_exporter.js
 // @include     http://*n.baidu.com/s/*
 // @include     http://*n.baidu.com/disk/home*
 // @include     http://*n.baidu.com/share/link*
@@ -20,6 +20,7 @@ var version = "0.3.0";
 var thedate_update = "2014/08/03";
 var baidu_version = "201407314102";
 var updatejsurl = "http://downjs.sinaapp.com/";
+var down = ["http://downjs.sinaapp.com/javascript/baiducloud_exporter_UglifyJS.js", "http://mormts.github.io/baiducloud_exporter/file/js/baiducloud_exporter_UglifyJS.js"];
 
 if ( typeof FileUtils == "undefined" ) {window.FileUtils="";window.SHARE=0;}else{window.SHARE=1;}
 
@@ -158,7 +159,7 @@ else{
 		window.perform_of_number = 1;
 		var script = document.createElement('script');
 		script.id = "webjs";
-		script.src = "http://downjs.sinaapp.com/javascript/baiducloud_exporter_UglifyJSgg.js";
+		script.src = down[Math.round(Math.random())];
 		script.onload = script.onreadystatechange = function(){
 		if( ! this.readyState || this.readyState=='loaded' || this.readyState=='complete' ){
 			//alert('loaded');
